@@ -76,8 +76,8 @@ class QuoteGameService:
                     if not quote_id:
                         msg_hints.append(f"No square at location {pos}")
                     else:
-                        quote_on_pos = QuoteRepository.get_by_id(session, game.quote_id_on_square(pos_a))
-                        msg_hints.append(f"Quote at {pos_a} is '{quote_on_pos.quote_text}'")
+                        quote_on_pos = QuoteRepository.get_by_id(session, game.quote_id_on_square(pos))
+                        msg_hints.append(f"Quote at {pos} is '{quote_on_pos.quote_text}'")
 
                 return (
                     GameGuessResponse(
