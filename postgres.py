@@ -1,9 +1,8 @@
-from asyncio import current_task
 from datetime import datetime
 
 from sqlalchemy import DateTime, Column, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 

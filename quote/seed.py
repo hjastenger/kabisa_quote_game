@@ -1,14 +1,13 @@
 import factory
 
-from postgres import Session
 from quote.models import Quote
 
 
-def quote_factory():
+def quote_factory(session):
     class QuoteFactory(factory.alchemy.SQLAlchemyModelFactory):
         class Meta:
             model = Quote
-            sqlalchemy_session = Session
+            sqlalchemy_session = session
             sqlalchemy_session_persistence = 'flush'
 
         id = factory.Sequence(lambda n: n)

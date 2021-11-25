@@ -1,14 +1,9 @@
-import asyncio
-import pytest
-
-from quote.models import QuoteRepository
 from quote.seed import quote_factory
 from quote_game.models import QuoteGame, SquarePosition
 
 
-@pytest.mark.asyncio
-async def test_create_game():
-    factory = quote_factory()
+def test_create_game(db_session_fixture):
+    factory = quote_factory(db_session_fixture)
     quote_fixtures = [factory() for i in range(8)]
 
     game = QuoteGame.construct_game(
@@ -31,9 +26,8 @@ async def test_create_game():
     assert game.game_state_to_int() == 0
 
 
-@pytest.mark.asyncio
-async def test_play_full_game():
-    factory = quote_factory()
+def test_play_full_game(db_session_fixture):
+    factory = quote_factory(db_session_fixture)
     quote_fixtures = [factory() for i in range(8)]
 
     game = QuoteGame.construct_game(
@@ -63,9 +57,8 @@ async def test_play_full_game():
     assert game.game_state_to_int() == (2**16)-1
 
 
-@pytest.mark.asyncio
-async def test_play_wrong_guess():
-    factory = quote_factory()
+def test_play_wrong_guess(db_session_fixture):
+    factory = quote_factory(db_session_fixture)
     quote_fixtures = [factory() for i in range(8)]
 
     game = QuoteGame.construct_game(

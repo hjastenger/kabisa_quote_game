@@ -1,32 +1,21 @@
 import pytest
 
-from postgres import Session
 from quote.seed import quote_factory
 from quote_game.service import QuoteGameService
 
 
 @pytest.mark.asyncio
-@pytest.fixture(autouse=True, scope='function')
-async def run_around_tests():
-    session = Session()
-    session.begin(subtransactions=True)
-    yield
-    session.rollback()
-    session.close()
-
-
-@pytest.mark.asyncio
-async def test_create_new_game_insufficient_quotes():
-    success, create_game_res = await QuoteGameService.create_new_game()
+async def test_create_new_game_insufficient_quotes(db_session_fixture):
+    success, create_game_res = await QuoteGameService.create_new_game(db_session_fixture)
 
     assert not success
 
 
 @pytest.mark.asyncio
-async def test_create_new_game():
-    factory = quote_factory()
+async def test_create_new_game(db_session_fixture):
+    factory = quote_factory(db_session_fixture)
     [factory() for i in range(8)]
 
-    success, create_game_res = await QuoteGameService.create_new_game()
+    success, create_game_res = await QuoteGameService.create_new_game(db_session_fixture)
 
     assert success
