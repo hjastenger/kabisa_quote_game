@@ -4,3 +4,13 @@ services:
     build: postgres/
     ports:
       - "5432:5432"
+
+  flyway:
+    container_name: 'flyway_migrations'
+    image: flyway/flyway:7.6
+    command: -configFiles=/flyway/conf/flyway_docker_compose.conf -connectRetries=60 migrate
+    volumes:
+      - "./flyway/sql:/flyway/sql:z"
+      - "./flyway/conf:/flyway/conf:z"
+    depends_on:
+      - postgres
