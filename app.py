@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from quote.router import router as quote_router
+from quote_game.router import router as quote_game_router
 import logging
 import sys
 
@@ -17,3 +18,4 @@ logger.propagate = False
 
 app = FastAPI()
 app.include_router(quote_router)
+app.include_router(quote_game_router)
