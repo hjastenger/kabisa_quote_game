@@ -1,6 +1,7 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
+from postgres import get_transactional_db_session
 from quote.service import QuoteService
 
 router = APIRouter(prefix='/quote')
@@ -12,8 +13,8 @@ class RandomQuoteResponse(BaseModel):
 
 
 @router.get('/', response_model=RandomQuoteResponse)
-async def quote():
-    quote_result = await QuoteService.fetch_and_create_quote()
+async def quote(session=Depends(get_transactional_db_session)):
+    quote_result = await QuoteService.fetch_and_create_quote(session)
 
     if quote_result.success:
         return quote_result.data

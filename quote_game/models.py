@@ -7,7 +7,7 @@ from sqlalchemy import Column, Integer, String, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.session import Session as SessionType
 
-from postgres import Base, TimestampMixin, Session
+from postgres import Base, TimestampMixin
 from quote.models import Quote
 
 
@@ -81,14 +81,10 @@ class QuoteGameRepository:
     aggregate_cls = QuoteGame
 
     @classmethod
-    def _current_session(cls) -> SessionType:
-        return Session()
+    def get_by_id(cls, session, game_id) -> Optional[QuoteGame]:
+        return session.query(cls.aggregate_cls).get(game_id)
 
     @classmethod
-    def get_by_id(cls, game_id) -> Optional[QuoteGame]:
-        return cls._current_session().query(cls.aggregate_cls).get(game_id)
-
-    @classmethod
-    def save(cls, aggregate) -> None:
-        cls._current_session().add(aggregate)
-        cls._current_session().flush()
+    def save(cls, session, aggregate) -> None:
+        session.add(aggregate)
+        session.flush()

@@ -2,7 +2,6 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-from postgres import transactional
 from quote.infra.storm_quote_api import QuoteAPI
 from quote.models import Quote, QuoteRepository
 
@@ -25,8 +24,7 @@ class GetQuoteListResult(BaseModel):
 class QuoteService:
 
     @staticmethod
-    @transactional()
-    async def fetch_and_create_quote() -> FetchQuoteResult:
+    async def fetch_and_create_quote(session) -> FetchQuoteResult:
         fetch_quote_result = await QuoteAPI.fetch_random_quote()
 
         if fetch_quote_result[0] == 200:
@@ -35,7 +33,7 @@ class QuoteService:
                 quote_text=fetch_quote_result[1]['quote']
             )
 
-            QuoteRepository.save(new_quote)
+            QuoteRepository.save(session, new_quote)
 
             return FetchQuoteResult(data=QuoteDetails(
                 author=new_quote.author, quote=new_quote.quote_text)
@@ -44,8 +42,8 @@ class QuoteService:
         return FetchQuoteResult(success=False, error_msg=f'Upstream API service responded with {fetch_quote_result[0]}')
 
     @staticmethod
-    async def get_quotes(limit=1) -> GetQuoteListResult:
-        aggregates = QuoteRepository.get_quotes(limit=limit)
+    async def get_quotes(session, limit=1) -> GetQuoteListResult:
+        aggregates = QuoteRepository.get_quotes(session, limit=limit)
         return GetQuoteListResult(
             quote_list=[QuoteDetails(
                 author=q.author, quote=q.quote_text)

@@ -3,7 +3,6 @@ from typing import Tuple, Optional
 
 from pydantic import BaseModel
 
-from postgres import transactional
 from quote.models import QuoteRepository
 from quote_game.models import QuoteGame, SquarePosition, QuoteGameRepository
 
@@ -18,13 +17,12 @@ class GameGuessResponse(BaseModel):
 
 class QuoteGameService:
     @staticmethod
-    @transactional()
-    async def create_new_game() -> Tuple[bool, str]:
-        quotes = QuoteRepository.get_quotes(limit=8)
+    async def create_new_game(session) -> Tuple[bool, str]:
+        quotes = QuoteRepository.get_quotes(session, limit=8)
         if len(quotes) == 8:
             new_game = QuoteGame.construct_game(quote_list=quotes, len_y_axis=4, len_x_axis=4)
 
-            QuoteGameRepository.save(new_game)
+            QuoteGameRepository.save(session, new_game)
             log.info(f"New quote game created {new_game.id} ")
             return True, new_game.id
         else:
@@ -35,11 +33,10 @@ class QuoteGameService:
             )
 
     @staticmethod
-    @transactional()
     async def check_guess(
-        game_id: int, pos_a: SquarePosition, pos_b: SquarePosition
+        session, game_id: int, pos_a: SquarePosition, pos_b: SquarePosition
     ) -> Tuple[Optional[GameGuessResponse], Optional[str]]:
-        if game := QuoteGameRepository.get_by_id(game_id):
+        if game := QuoteGameRepository.get_by_id(session, game_id):
             if game.is_finished:
                 return (
                     GameGuessResponse(
@@ -62,7 +59,7 @@ class QuoteGameService:
 
             correct_guess = game.guess(pos_a, pos_b)
             if correct_guess:
-                QuoteGameRepository.save(game)
+                QuoteGameRepository.save(session, game)
 
                 if game.is_finished:
                     msg = f"Congratulations you have beaten the game!"
@@ -79,7 +76,7 @@ class QuoteGameService:
                     if not quote_id:
                         msg_hints.append(f"No square at location {pos}")
                     else:
-                        quote_on_pos = QuoteRepository.get_by_id(game.quote_id_on_square(pos_a))
+                        quote_on_pos = QuoteRepository.get_by_id(session, game.quote_id_on_square(pos_a))
                         msg_hints.append(f"Quote at {pos_a} is '{quote_on_pos.quote_text}'")
 
                 return (
